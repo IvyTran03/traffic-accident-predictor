@@ -3,6 +3,7 @@
 This project explores the use of supervised machine learning models to predict the severity of road traffic accidents based on weather, time, and other crash-related features.
 > This project was completed as a group assignment for a machine learning class.  
 > This repository highlights my personal contributions and hosts the final report.
+
 > [Dataset from Kaggle] https://www.kaggle.com/datasets/saurabhshahane/road-traffic-accidents
 
 ## Summary
