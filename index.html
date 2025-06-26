@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CS 4641 Project</title>
+    <style>
+        body {
+            background-color: #fff;
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: auto;
+            padding: 20px;
+            display: flex;
+        }
+        .team-info {
+            font-size: 14px;
+            max-width: 200px;
+            flex-shrink: 0;
+            margin-right: 20px;
+            margin-top: 20px;
+        }
+        .team-info a {
+            text-decoration: none;
+            color: #007BFF;
+        }
+        .team-info a:hover {
+            color: #0056b3;
+        }
+        .content {
+            flex-grow: 1;
+        }
+        h1 {
+            text-align: center;
+        }
+        section {
+            max-width: 700px;
+            margin: auto;
+            padding: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="team-info">
+        <p><strong>Team 46:</strong><br> Nikil Kandala<br> Ivy Tran<br> Sanat Dhanyamraju<br> Sanjana Kolla<br> Anya Sharif</p>
+        <p><a href="https://github.gatech.edu/nkandala3/CS-4641-Project">Link to GitHub</a></p>
+    </div>
+    
+    <div class="content">
+        <h1>Traffic Accident Predictor Final Report</h1>
+        
+        <section>
+            <h2>Introduction/Background</h2>
+            <p>Cars and buses are used daily by an overwhelming majority of people and with that comes the risks of accidents. Much research in the past has focused on a basic level prediction of traffic accidents without truly analyzing the interconnected layers of factors involved in it. However, some researchers have utilized a number of machine learning models such as Gradient Boosting and Random Forest to predict the severity level of traffic accidents [1].</p>
+            <p></p>
+            <p>Our team aims to do a similar analysis by utilizing the Road Traffic Accidents dataset by Saurabh Shahane from Kaggle. This dataset contains 12,316 samples with 32 features, covering key aspects such as crash time, weather conditions, and accident severity. By analyzing these features, we aim to identify the most influential factors and use ML to predict traffic accident severity.</p>
+
+            <a href="https://www.kaggle.com/datasets/saurabhshahane/road-traffic-accidents"> Road Traffic Accidents Dataset</a>
+        </section>
+        
+        <section>
+            <h2>Problem Definition</h2>
+            <p>Car accidents cause around 40,000 deaths annually in the U.S., a number that has been rising over the past decade [2]. Additionally, accidents result in severe injuries and property damage, both physically and financially crippling those involved. Developing a method to predict an accident’s severity is thus a critical problem to solve.</p>
+            <p></p>
+            <p>Due to the large number of factors at play in car accidents, it is extremely difficult to predict severity using traditional analysis methods. A machine learning model, on the other hand, is much more suited for this task, allowing it to identify key risk factors and predict severity levels. This model can help authorities better understand and handle traffic accidents by isolating the key factors that increase an accident’s severity. This approach can enhance road safety, reduce response times, and support data-driven strategies to prevent severe accidents.</p>
+        </section>
+        
+        <section>
+            <h2>Methods</h2>
+            <h3>Initial Overview</h3>
+            <p>To develop the model, we will preprocess the data by handling missing values with sklearn.impute. For categorical features, missing values will be replaced with the most frequent value, while numerical features will use the mean or median. We will then encode categorical variables with OneHotEncoder and normalize numerical data using StandardScaler. We will also apply KMeans clustering (unsupervised learning) to group similar accidents, with the resulting cluster labels serving as a new feature to improve our model prediction.</p>
+            <p></p>
+            <p>For our machine learning models, we will evaluate 3 supervised learning algorithms: Multinomial Logistic Regression, Random Forest, and XGBoost. Multinomial Logistic Regression is effective because it helps us understand how individual factors contribute to the severity of a traffic accident. Random Forest is well-suited for handling the many features in our dataset, as it can capture complex relationships between them. Lastly, XGBoost works well for classification tasks, such as predicting accident severity type like our case, and handles complexity and imbalances in data fairly well.</p>
+            <p></p>
+            <h3>Data Cleaning and Preprocessing</h3>
+            <h4>Multinomial Logistic Regression</h4>
+            <p>One quality issue that we realized from our dataset is that there is a large number of data points with at least one column having the value of ‘unknown’, which can also be thought of as a missing value. For our Multinomial Logistic Regression model, our initial plan was to replace the missing values with average values. The trade offs of this is reducing data loss, but potentially introducing bias. Since we had a pretty large dataset (over 12,000 entries), we decided instead to just drop the rows with missing values. That still left us with over 7,000 data points, which we felt was enough to work with. Since we need to work with numerical values and not categorical ones, we then proceeded to encode our data. For the columns that had ordinal values we used label encoding and for the columns that did not have a natural ordering we used one-hot encoding.
+            </p>
+            <h4>Random Forest</h4>
+            <p>For the Random Forest model, we handled things a bit differently. Since Class 2 (low severity) made up most of the data, we decided to drop the rows with missing values from that class only. For Class 0 and Class 1, which had fewer examples, we filled in missing values using the most frequent value in each column. This way, we could keep more data from the minority classes while still cutting down the imbalance caused by the majority class. Unlike the first model, we used label encoding for all categorical data, even the nominal ones, since Random Forests can handle that pretty well.
+            </p>
+            <h4>XGBoost</h4>
+            <p>For the XGBoost model, we chose to fill in all missing values with the most common value (the mode) in each column, regardless of the class. Even though XGBoost can handle missing values on its own, we decided to impute them manually so that our input data would be consistent across all models. We used label encoding for both nominal and ordinal features in our XGBoost model. While one-hot encoding is often preferred for nominal data, we found that label encoding gave us better performance and kept the feature space simpler. Since XGBoost handles splits on encoded values well and doesn’t assume a strict order, label encoding worked effectively for both types of categorical data.
+            </p>
+            <h3>Feature Reduction</h3>
+            <h4>Multinomial Logistic Regression</h4>
+            <p>For feature reduction, we used Principal Component Analysis (PCA) as a dimensionality reduction technique. Since we used One Hot Encoder to encode the nominal features, the feature set expanded from 32 columns into 1146 columns. This led to a high-dimensional feature space which can cause problems such as overfitting and increased computational complexity. By performing PCA on the data, we reduce the dataset into more manageable components, while retaining most of the variance and information. 
+            </p>
+            <h4>Random Forest</h4>
+            <p>For our second model, since we label encoded our data, the feature space didn’t expand, so we used Recursive Feature Elimination (RFE) with Random Forest to pick out the most important features. RFE works by repeatedly removing features and checking how well the model performs after each removal. This process continues until we’re left with the best features. In the end, we selected 28 features out of 32, which gave us the best performance without overcomplicating the model.
+            </p>
+            <h4>XGBoost</h4>
+            <p>For our third model, XGBoost, we didn’t perform any feature reduction because XGBoost has built-in feature selection capabilities. XGBoost automatically handles irrelevant or less important features during training by assigning them lower weights, and it focuses more on the features that contribute most to model performance, so we didn’t need to reduce the feature space beforehand.
+            </p>
+            <h3>Multinomial Logistic Regression</h3>
+            <p>For our first machine learning model, we implemented the supervised learning model of Multinomial Logistic Regression. The traffic accidents dataset we are using heavily consists of categorical data such as weather conditions (rain, sun, etc.) and type of collision (collision with animals, roadside objects, etc.). Thus Multinomial Logistic Regression works very well in this case because it is intended for predicting categorical outcomes when there are more than two categories which aligns very closely with our goal. 
+            </p>
+            <h3>Random Forest</h3>
+            <p>The second machine learning model we chose to implement was Random Forest, which is a supervised learning model. We chose Random Forest because it works well for classification tasks, such as predicting traffic accident severity type in our use case. Additionally, Random Forest provides feature importance analysis, and we thought this could be utilized in determining the most important factors that contribute to accident severity type. While training our model, we also used Grid Search to tune hyperparameters to optimize the F1-macro score, ensuring that we found the most optimal Random Forest model possible for the training data being used.</p>
+            <h3>XGBoost</h3>
+            <p>Our third ML model we chose to implement was XGBoost. It is very powerful and applicable to our use case because it performs well on datasets that are well structured and high dimensional, which ours happens to be. It is also very suitable for classification tasks and can handle class imbalance well which is important since that is present in our dataset. It also has built in L1 and L2 regularization for preventing overfitting and can handle non-linearity well. Lastly, XGBoost can determine feature importance which is closely related to our goal of identifying the most influential features for accidents. </p>
+        </section>
+        
+        <section>
+            <h2>Results and Discussion</h2>
+            <h3>Expected before implementation</h3>
+            <p>To evaluate and compare our model's performances, we plan to use the accuracy, F1-score, and AUC-ROC metrics. The combination of these three metrics will allow us to properly account for any class imbalances in the dataset as well as provide a comprehensive report of each model’s performance. Our goal for our model is to have an accuracy of at least 80% and an F1-score of 0.8 or higher. This will ensure that our model can reliably be used with new data in practical applications later.</p>
+            <p></p>
+            <p>We also aim to identify the key features that contribute to accident severity by analyzing feature importance, which will provide useful insights for improving road safety. While training our models, we will ensure that we use a dataset that is unbiased and includes data from different demographic groups. It is important that we choose our dataset carefully since “the use of unsuitable and inadequate datasets risks perpetuating societal inequalities and causing harm” [3].</p>
+            <p></p>
+            <h2>Actual Results and Discussion</h2>
+            <h3>Multinomial Linear Regression</h3>
+            <h4>Visualizations</h4>
+            <h4>Confusion Matrix</h4>
+            <p><img src="images\Logistic Confusion Matrix.png">This is the confusion matrix of the trained Logistic Regression model. The model is extremely effective at identifying low severity accidents (label 2) correctly, with it not performing as well on more severe accidents. This could be caused by our dataset containing more samples of low severity.</p>
+            <h4>Scree Plot</h4>
+            <p><img src="images\ScreePlot.png">This scree plot shows the variance explained by each principal component, revealing that the first few principal components explain a super small fraction of the total variance each, since no single component is dominating. There is also no sharp elbow in the curve which could indicate the variance of this data is spread out across many dimensions. This means that capturing most of the variance requires a larger amount of principal components (rather than just one or two). With variance spread thinly across many components, it seems the PCA reduction might not have captured a small set of dominant features.</p>
+            <h4>Calibration Plot</h4>
+            <p><img src="images\CalibrationPlot.png">These calibration plots compare the predicted probabilities to the actual observed outcomes for each accident severity class. Unfortunately, none of the lines closely follow the diagonal - this suggests the model’s predicted probabilities are not calibrated as well as they could be. There are examples of both underestimation and overestimation at various probability levels. Miscalibration can happen because of the linear nature of logistic regression, (especially here, since we applied PCA), so it might not reveal the direct relationship between features and the target. This means that while the classification might be acceptable, the probabilities are off.</p>
+            <h4>Quantitative Metrics</h4>
+            <p>Our model had an accuracy of 80.96%, which met our accuracy goal of 80% or higher that we set before implementation. Although the accuracy of our model was high, the calculated F1 macro score was only 0.499, which is much lower than our expected goal of 0.80. A high accuracy but low F1 macro score indicates that our model is performing poorly on one or more classes with fewer samples in the training data, even if it does well on the dominant class. Also, the macro ROC-AUC score for the model was 0.748, which means that the model does fairly well at distinguishing between classes on average. However, the ROC-AUC score also reinforces the idea that our model is favoring some classes and neglecting minority classes.</p>
+            <p></p>
+            <h4>Analysis</h4>
+            <p>The Multinomial Logistic Regression model achieved high accuracy in its predictions. However, this may be due to class imbalance in the dataset, where most data points belong to the low-severity class. As a result, the model tends to predict the majority class most of the time, leading to high accuracy while failing to correctly classify minority classes. Since accuracy does not consider class distribution, it can be misleading in imbalanced datasets. In a way, our model performed well because of class imbalance, but also performed poorly because of class imbalance. 
+            </p>
+            <p>Overall, our model did not perform as well as we expected. This could be due to a variety of factors. First, due to the high variance across all features, we were not able to greatly reduce the number of features for each sample. The large number of features did not work well with the Logistic Regression algorithm used, hindering its performance. Additionally, Logistic Regression assumes linearity, a factor which is not necessarily true in our particular dataset. Due to this, Logistic Regression was not as effective as we hoped for predicting accident severity.
+            </p>
+            <p></p>
+            <h3>Random Forest</h3>
+            <h4>Visualizations</h4>
+            <h4>Confusion Matrix</h4>
+            <p><img src="images\RandomForestConfusion.png">This is the confusion matrix generated from our Random Forest model. Class 2 (slight severity accidents) dominate the training dataset, and the model predicts these samples significantly well. However, class 0 (fatal) and class 1 (severe) are both poorly predicted, most likely due to their much smaller sample sizes in the training data compared to class 2. Overall, the model's high accuracy is driven by the correct class 2 predictions, and other classes are misclassified, especially as being class 2. This shows that the model is struggling with dealing with class imbalance.
+            <h4>Feature Importance</h4>
+            <p><img src="images\RandomForestFeature.png" style="width: 700px; height: auto;">This is the feature importance graph for the Random Forest model, which shows us which features the model is utilizing the most in its predictions. The most important feature for predicting traffic accident severity is the number of casualties and time. Feature like pedestrian movement, road surface conditions, and vehicle driver relation are significantly less important at predicting the severity of an accident. This graph illustrates the most influential factors when determining the severity of an accident, and it also can be used to drop less important features in the future if we wanted to reduce the model's dimensionality.
+            <h4>Quantitative Metrics</h4>
+            <p>Our Random Forest model achieved an accuracy of 85.30%, which met our accuracy goal of 80% or higher that we set earlier. However, the F1-macro score was lower at 0.567, which indicates that the model struggled at predicting at least one or more of the minority classes. The macro ROC-AUC score was 0.787, so this means that the model can distinguish between classes decently well, on average.</p>
+            <h4>Analysis</h4>
+            <p>The Random Forest model demonstrated a high overall accuracy. Although this may seem like great model performance, the Random Forest model struggled at predicting the minority classes, specifically class 0 (fatal accidents) and class 1 (severe accidents), as the confusion matrix illustrated. This closer look reveals that the model's success is heavily influenced by a significant imbalance in class distribution since most of the correct predictions were part of the majority class (slight severity accidents). This skew results in high accuracy, but masks the model’s poor handling of less frequent, higher-severity cases, as indicated by lower F1-macro score. Also, while Random Forest models are typically robust, the inclusion of many features with minimal contribution may have diluted the model's effectiveness. The feature importance plot shows that only a few variables, like number of casualties and time, had a significantly meaningful impact, while many other features offered relatively less value. In general, the model's overall performance fell short of expectations due to class imbalance in the training dataset as well as its possible reliance on a small subset of features. </p>
+            <h3>XGBoost</h3>
+            <h4>Visualizations</h4>
+            <h4>Confusion Matrix</h4>
+            <p><img src="images\XGConfusion.png">This is the confusion matrix of the trained XGBoost model. The model's accuracy is almost entirely driven by the majority class, which is slight severity. The model often misclassifies fatal and severe accidents, which is similar to the previous models.</p>
+            <h4>Feature Importance</h4>
+            <p><img src="images\XGFeature.png">This is the feature importance graph of the trained XGBoost model. The number of vehicles involved in the accident was the most important feature, which differs from the Random Forest model, where the Time of the accident was the amongst the most important. After the top feature, which has a 33% higher F score than the next highest, all features are relatively close to each other, with no large gaps between adjacent features. This suggests that the Number of Vehicles Involved is much more important than all other features for prediction.</p>
+            <h4>One vs. Rest ROC Curves</h4>
+            <p><img src="images\XGROC.png">This are the One vs. Rest ROC Curves for the trained XGBoost model. The model showed extremely good discrimination for fatal accidents, while it only showed moderate discrimination for severe and slightly severe accidents. The AUC scores are all greater than 0.5, showing that the model did learn for all classes. In order to improve performance, the thresholds may need to be adjusted to promote prediction of fatal accidents.</p>
+            <h4>Calibration Curve</h4>
+            <p><img src="images\XGCalibration.png" style="display:block">This is the calibration curve for severe accidents. The line does not closely follow the diagonal; it overestimates in low ranges and underestimates in high ranges. This suggests that the predicted probabilities are not calibrated well. </p>
+            <h4>Quantitative Metrics</h4>
+            <p>Our XGBoost model achieved an accuracy of 85.0%, which surpassed our set goal of 80% or higher. On the other hand, it unfortunately only achieved an F1 macro score of 0.47, indicating this model is underperforming at predicting minority classes. Also, the macro ROC-AUC score for the model was 0.77, which means the model is able to distinguish between classes fairly well on average.</p>
+            <h4>Analysis</h4>
+            <p>The XGBoost model achieved high accuracy overall. However, it struggled at predicting the minority classes, specifically class 0 (fatal accidents) and class 1 (severe accidents), as seen via the confusion matrix. The combination of a higher accuracy but lower F1 macro score indicates that our model’s performance decreases on one or more classes with fewer samples in the training data, even if it does fairly well classifying the dominant class. The high ROC-AUC and accuracy together suggest that with further refinement, through steps like further rebalancing the training data or adjusting class weights, the model has strong potential for more balanced performance. Overall, the XGBoost model proved to be a good, powerful model for our traffic accident analysis and prediction. Its strong generalization performance and ability to capture complex patterns in the data make it a promising foundation for future work in this area.</p>
+            <h2>Comparison of models</h2>
+            <p>Overall, we found that Random Forest performed the best for predicting accident severity. Initially, it did not perform as well as we expected, however through implementing grid search to tune hyperparameters, it became the most effective, with both the highest accuracy and the highest F1 macro. This suggests the model is now much more balanced across classes compared to the other models, especially among the minority classes. Grid Search helped us find the optimal combination of depth, number of trees, and minimum samples per split, reducing overfitting to the majority class and allowing the model to generalize better. Logistic Regression, in comparison, performed the worst. This is most likely due to it struggling to capture the nonlinear relationships present in our dataset. </p>
+            <h2>Next Steps</h2>
+            <p>Although Random Forest performed the best out of the three models, they all struggled when it came to predicting minority classes. This highlights a big issue with our dataset which is the class imbalance. To make the results more generalizable we need to ensure that in the future, the dataset contains an equal number of samples for all classes and also apply techniques like class weighting. This will ensure more balanced performance when it comes to all severity levels. Another technique we could utilize in the future would be resampling. Overall, Random Forest identifies the number of casualties as the most important feature, while XGBoost ranks the number of vehicles involved as the most important when predicting future accidents. With the changes we suggested to our dataset, it would be interesting to see if the most influential feature would change.</p>
+            <p></p>
+        </section>
+        
+        <section>
+            <h2>References</h2>
+            <p>[1] S. Ahmed, M. A. Hossain, S. K. Ray, M. M. I. Bhuiyan, and S. R. Sabuj, "A study on road accident prediction and contributing factors using explainable machine learning models: Analysis and performance," Transp. Res. Interdiscip. Perspect., vol. 19, p. 100814, 2023. doi: 10.1016/j.trip.2023.100814.</p>
+            <p></p>
+            <p>[2] National Center for Statistics and Analysis. (2024, December). Early estimate of motor vehicle traffic fatalities for the first 9 months (January-September) of 2024 (Crash•Stats Brief Statistical Summary. Report No. DOT HS 813 670). National Highway Traffic Safety Administration.</p>
+            <p></p>
+            <p>[3] W. Orr and K. Crawford, “Building Better Datasets: Seven Recommendations for Responsible Design from Dataset Creators,” Journal of Data-centric Machine Learning Research, Aug. 2024. Accessed: Feb. 20, 2025. [Online]. Available: https://arxiv.org/abs/2409.00252.</p>
+        </section>
+
+
+        <section>
+            <h2>Gantt Chart</h2>
+            <a href="https://gtvault-my.sharepoint.com/:x:/g/personal/ktran321_gatech_edu/EWfYr1KaEQJFjTboyjsxmUoBr3TvlkEJumvvSBePFrxdhg?e=6aiy3w">Gantt Chart Link</Link></a>
+        </section>
+        
+        <section>
+            <h2>Team Contributions</h2>
+            <table border="1" cellspacing="0" cellpadding="5" style="width: 100%; border-collapse: collapse;">
+                <tr>
+                    <th>Name</th>
+                    <th>Final Report Contributions</th>
+                </tr>
+                <tr>
+                    <td>Ivy Tran</td>
+                    <td>Methods, Random Forest Visualization, Random Forest Metrics</td>
+                </tr>
+                <tr>
+                    <td>Anya Sharif</td>
+                    <td>Next Steps, XGBoost Visualization, XGBoost Metrics</td>
+                </tr>
+                <tr>
+                    <td>Nikil Kandala</td>
+                    <td>Methods, Random Forest Visualization, Random Forest Metrics</td>
+                </tr>
+                <tr>
+                    <td>Sanjana Kolla</td>
+                    <td>Next Steps, XGBoost Visualization, XGBoost Metrics</td>
+                </tr>
+                <tr>
+                    <td>Sanat Dhanyamraju</td>
+                    <td>Comparison of Models, Random Forest Analsysi, XGBoost Analysis</td>
+                </tr>
+            </table>
+        </section>
+
+        <section>
+            <h2>Project Award Eligibility</h2>
+            <p>We do not wish to opt in for the ‘Outstanding Project’ award.</p>
+        </section>
+    </div>
+</body>
+</html>
